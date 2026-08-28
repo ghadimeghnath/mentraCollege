@@ -6,16 +6,16 @@ export default function MentorLayout({ children }: { children: React.ReactNode }
     <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
       <aside className="lg:w-1/5">
         <nav className="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-2">
-          <Button variant="ghost" className="justify-start" render={<Link href="/mentor" />}>
+          <Button variant="ghost" className="justify-start" render={<Link href="/mentor" />} nativeButton={false}>
             Overview
           </Button>
-          <Button variant="ghost" className="justify-start" render={<Link href="/mentor/mentees" />}>
+          <Button variant="ghost" className="justify-start" render={<Link href="/mentor/mentees" />} nativeButton={false}>
             Mentees
           </Button>
-          <Button variant="ghost" className="justify-start" render={<Link href="/mentor/meetings" />}>
+          <Button variant="ghost" className="justify-start" render={<Link href="/mentor/meetings" />} nativeButton={false}>
             Meetings
           </Button>
-          <Button variant="ghost" className="justify-start" render={<Link href="/mentor/remarks" />}>
+          <Button variant="ghost" className="justify-start" render={<Link href="/mentor/remarks" />} nativeButton={false}>
             Remarks
           </Button>
         </nav>

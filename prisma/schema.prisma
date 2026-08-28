@@ -18,11 +18,13 @@ enum Role {
 model User {
   id                 String              @id @default(cuid())
   email              String              @unique
-  password           String
+  password           String?
   role               Role
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   profile            Profile?
+  facultyProfile     FacultyProfile?
+  studentProfile     StudentProfile?
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -44,4 +46,140 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
+}
+
+model FacultyProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId     String? @unique
+  initials       String?
+  facultySubjects FacultySubject[]
+}
+
+model StudentProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollNumber     String?
+  studentId      String? @unique
+  enrollments    StudentEnrollment[]
+}
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  classes   Class[]
+  enrollments StudentEnrollment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  code      String?
+  status    Boolean  @default(true)
+  order     Int      @default(0)
+  levels    AcademicLevel[]
+  classes   Class[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AcademicLevel {
+  id           String      @id @default(cuid())
+  name         String
+  order        Int         @default(0)
+  status       Boolean     @default(true)
+  departmentId String
+  department   Department  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  divisions    Division[]
+  classes      Class[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Division {
+  id        String        @id @default(cuid())
+  name      String
+  status    Boolean       @default(true)
+  levelId   String
+  level     AcademicLevel @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  classes   Class[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Class {
+  id             String       @id @default(cuid())
+  name           String
+  departmentId   String
+  department     Department   @relation(fields: [departmentId], references: [id])
+  levelId        String
+  level          AcademicLevel @relation(fields: [levelId], references: [id])
+  divisionId     String
+  division       Division     @relation(fields: [divisionId], references: [id])
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  status         Boolean      @default(true)
+  
+  subjects       ClassSubject[]
+  enrollments    StudentEnrollment[]
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model StudentEnrollment {
+  id             String         @id @default(cuid())
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId        String
+  class          Class          @relation(fields: [classId], references: [id])
+  academicYearId String
+  academicYear   AcademicYear   @relation(fields: [academicYearId], references: [id])
+  
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([studentId, academicYearId])
+}
+
+model Subject {
+  id          String         @id @default(cuid())
+  name        String
+  code        String?
+  description String?
+  isActive    Boolean        @default(true)
+  classes     ClassSubject[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ClassSubject {
+  id        String   @id @default(cuid())
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  
+  facultyAssignments FacultySubject[]
+
+  @@unique([classId, subjectId])
+}
+
+model FacultySubject {
+  id               String         @id @default(cuid())
+  facultyId        String
+  faculty          FacultyProfile @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  classSubjectId   String
+  classSubject     ClassSubject   @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+  handlesTheory    Boolean        @default(false)
+  handlesPractical Boolean        @default(false)
+
+  @@unique([facultyId, classSubjectId])
 }

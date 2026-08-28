@@ -24,8 +24,8 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        // Ensure user exists and role matches what the route expects
-        if (!user || user.role.toLowerCase() !== credentials.role.toLowerCase()) {
+        // Ensure user exists, has a password, and role matches what the route expects
+        if (!user || !user.password || user.role.toLowerCase() !== credentials.role.toLowerCase()) {
           return null;
         }
 
