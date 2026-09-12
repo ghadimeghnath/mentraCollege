@@ -85,8 +85,8 @@ export function AcademicYearManager({ initialData }: { initialData: AcademicYear
             {initialData.map((year) => (
               <TableRow key={year.id}>
                 <TableCell className="font-medium">{year.name}</TableCell>
-                <TableCell>{new Date(year.startDate).toLocaleDateString()}</TableCell>
-                <TableCell>{new Date(year.endDate).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(year.startDate).toLocaleDateString("en-US")}</TableCell>
+                <TableCell>{new Date(year.endDate).toLocaleDateString("en-US")}</TableCell>
                 <TableCell>
                   {year.isActive ? (
                     <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Active</span>

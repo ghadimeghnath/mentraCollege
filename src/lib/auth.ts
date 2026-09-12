@@ -1,5 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma/client";
 
@@ -8,6 +9,10 @@ export const authOptions: NextAuthOptions = {
     signIn: "/",
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -44,8 +49,40 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 4 }, // 4 days
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        const email = profile?.email;
+        if (!email?.endsWith("@vvm.edu.in")) {
+          return "/?error=AccessDeniedDomain";
+        }
+        
+        let dbUser = await prisma.user.findUnique({ where: { email } });
+        
+        if (!dbUser && email === "2411020.simran.sdcce@vvm.edu.in") {
+          dbUser = await prisma.user.create({
+            data: {
+              email,
+              role: "ADMIN",
+            }
+          });
+        }
+        
+        if (!dbUser) {
+          return "/?error=AccessDeniedProvisioning";
+        }
+        
+        return true;
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === "google") {
+        const dbUser = await prisma.user.findUnique({ where: { email: token.email as string }});
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.id = dbUser.id;
+        }
+      } else if (user) {
         token.role = user.role;
         token.id = user.id;
       }
