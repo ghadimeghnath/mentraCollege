@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions = {
         
         let dbUser = await prisma.user.findUnique({ where: { email } });
         
-        if (!dbUser && email === "2411020.simran.sdcce@vvm.edu.in") {
+        if (!dbUser && email === "2411011.meghnath.sdcce@vvm.edu.in") {
           dbUser = await prisma.user.create({
             data: {
               email,
