@@ -53,7 +53,7 @@ export function LoginForm({ expectedRole }: { expectedRole: string }) {
   const isAdmin = expectedRole.toLowerCase() === "admin";
 
   return (
-    <div className="w-full max-w-md p-8 space-y-6 bg-card text-card-foreground shadow-md rounded-xl border">
+    <div className="w-full max-w-md p-8 space-y-8 bg-card/80 backdrop-blur-md text-card-foreground shadow-2xl rounded-2xl border border-white/10 dark:border-white/5">
       <div className="space-y-2 text-center">
         <h1 className="text-2xl font-bold tracking-tight">Login as {expectedRole}</h1>
         <p className="text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ export function LoginForm({ expectedRole }: { expectedRole: string }) {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full"
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input/50 bg-background/50 hover:bg-accent hover:text-accent-foreground h-11 px-4 py-2 w-full shadow-sm hover:shadow"
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path
@@ -112,7 +112,7 @@ export function LoginForm({ expectedRole }: { expectedRole: string }) {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-11 w-full rounded-lg border border-input/50 bg-background/50 px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
               </div>
@@ -125,7 +125,7 @@ export function LoginForm({ expectedRole }: { expectedRole: string }) {
                   {...register("password")}
                   id="password"
                   type="password"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-11 w-full rounded-lg border border-input/50 bg-background/50 px-3 py-2 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
               </div>
@@ -133,7 +133,7 @@ export function LoginForm({ expectedRole }: { expectedRole: string }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-4 py-2 w-full shadow-md hover:shadow-lg"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </button>
