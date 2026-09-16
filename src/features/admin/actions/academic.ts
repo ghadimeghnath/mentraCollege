@@ -3,6 +3,12 @@
 import { prisma } from "@/lib/prisma/client";
 import { revalidatePath } from "next/cache";
 
+function safeRevalidate(path: string) {
+  try {
+    revalidatePath(path);
+  } catch {}
+}
+
 // ==========================================
 // Academic Year
 // ==========================================
@@ -32,7 +38,7 @@ export async function createAcademicYear(data: { name: string; startDate: Date; 
     },
   });
   
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }
 
@@ -42,7 +48,7 @@ export async function setAcademicYearActive(id: string) {
     where: { id },
     data: { isActive: true },
   });
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }
 
@@ -64,7 +70,7 @@ export async function createDepartment(data: { name: string; code?: string; stat
       order: data.order ?? 0,
     },
   });
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }
 
@@ -73,7 +79,7 @@ export async function updateDepartment(id: string, data: { name?: string; code?:
     where: { id },
     data,
   });
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }
 
@@ -97,7 +103,7 @@ export async function createAcademicLevel(data: { name: string; departmentId: st
       status: data.status ?? true,
     },
   });
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }
 
@@ -120,7 +126,7 @@ export async function createDivision(data: { name: string; levelId: string; stat
       status: data.status ?? true,
     },
   });
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }
 
@@ -148,6 +154,6 @@ export async function createClass(data: { name: string; departmentId: string; le
   const result = await prisma.class.create({
     data,
   });
-  revalidatePath("/admin/academic");
+  safeRevalidate("/admin/academic");
   return result;
 }

@@ -17,7 +17,7 @@ export function ClassManager({
   academicYears
 }: { 
   initialClasses: (Class & { department: Department, level: AcademicLevel, division: Division, academicYear: AcademicYear })[], 
-  initialDivisions: (Division & { level: AcademicLevel })[],
+  initialDivisions: (Division & { level?: AcademicLevel | null })[], 
   departments: Department[],
   levels: AcademicLevel[],
   academicYears: AcademicYear[]
@@ -99,7 +99,7 @@ export function ClassManager({
               {initialDivisions.map((div) => (
                 <TableRow key={div.id}>
                   <TableCell className="font-medium">{div.name}</TableCell>
-                  <TableCell>{div.level.name}</TableCell>
+                  <TableCell>{div.level?.name || div.yearLevel || "-"}</TableCell>
                   <TableCell>{div.status ? "Active" : "Inactive"}</TableCell>
                 </TableRow>
               ))}

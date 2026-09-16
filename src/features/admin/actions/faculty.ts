@@ -3,6 +3,12 @@
 import { prisma } from "@/lib/prisma/client";
 import { revalidatePath } from "next/cache";
 
+function safeRevalidate(path: string) {
+  try {
+    revalidatePath(path);
+  } catch {}
+}
+
 export async function getFaculties(searchQuery?: string) {
   return prisma.user.findMany({
     where: { 
@@ -48,7 +54,7 @@ export async function createFaculty(data: { name: string; email: string; phone?:
     },
   });
 
-  revalidatePath("/admin/faculty");
+  safeRevalidate("/admin/faculty");
   return result;
 }
 
@@ -71,7 +77,7 @@ export async function updateFaculty(id: string, data: { name?: string; phone?: s
     },
   });
 
-  revalidatePath("/admin/faculty");
+  safeRevalidate("/admin/faculty");
   return result;
 }
 
@@ -80,6 +86,6 @@ export async function deleteFaculty(id: string) {
     where: { id },
   });
 
-  revalidatePath("/admin/faculty");
+  safeRevalidate("/admin/faculty");
   return result;
 }

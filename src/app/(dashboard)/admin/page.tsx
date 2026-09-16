@@ -1,57 +1,29 @@
-import { prisma } from "@/lib/prisma/client";
-import { AcademicYearManager } from "@/features/admin/components/AcademicYearManager";
-import { ClassManager } from "@/features/admin/components/ClassManager";
-import { DepartmentManager } from "@/features/admin/components/DepartmentManager";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Suspense } from "react";
+import { getDepartmentsWithPrograms, getPrograms } from "@/features/admin/actions/hierarchy";
+import { getAcademicYears } from "@/features/admin/actions/academic";
+import { getFaculties } from "@/features/admin/actions/faculty";
+import { getSubjects } from "@/features/admin/actions/subject";
+import { AcademicCommandCenter } from "@/features/admin/components/AcademicCommandCenter";
 
 export default async function AdminDashboardPage() {
-  const academicYears = await prisma.academicYear.findMany({ orderBy: { startDate: 'desc' } });
-  
-  const departments = await prisma.department.findMany();
-  const levels = await prisma.academicLevel.findMany({ include: { department: true } });
-  const divisions = await prisma.division.findMany({ include: { level: true } });
-  
-  const classes = await prisma.class.findMany({ 
-    include: { 
-      department: true, 
-      level: true, 
-      division: true,
-      academicYear: true
-    } 
-  });
-  
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Academic Setup</h2>
-        <p className="text-muted-foreground">Manage academic years, departments, levels, and classes.</p>
-      </div>
+  const [academicYears, departments, programs, faculties, subjects] =
+    await Promise.all([
+      getAcademicYears(),
+      getDepartmentsWithPrograms(),
+      getPrograms(),
+      getFaculties(),
+      getSubjects(),
+    ]);
 
-      <Tabs defaultValue="academic-year" className="w-full">
-        <TabsList className="mb-4 flex flex-wrap h-auto gap-2">
-          <TabsTrigger value="academic-year">Academic Years</TabsTrigger>
-          <TabsTrigger value="departments">Departments & Levels</TabsTrigger>
-          <TabsTrigger value="classes">Divisions & Classes</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="academic-year">
-          <AcademicYearManager initialData={academicYears} />
-        </TabsContent>
-        
-        <TabsContent value="departments">
-          <DepartmentManager initialDepartments={departments} initialLevels={levels} />
-        </TabsContent>
-        
-        <TabsContent value="classes">
-          <ClassManager 
-            initialClasses={classes} 
-            initialDivisions={divisions} 
-            departments={departments} 
-            levels={levels} 
-            academicYears={academicYears} 
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+  return (
+    <Suspense fallback={<div className="py-12 text-center text-muted-foreground text-sm">Loading Academic Setup...</div>}>
+      <AcademicCommandCenter
+        academicYears={academicYears}
+        departments={departments}
+        programs={programs}
+        subjects={subjects}
+        faculties={faculties}
+      />
+    </Suspense>
   );
 }

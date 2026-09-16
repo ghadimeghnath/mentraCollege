@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,15 +15,15 @@ enum Role {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  email              String              @unique
-  password           String?
-  role               Role
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  profile            Profile?
-  facultyProfile     FacultyProfile?
-  studentProfile     StudentProfile?
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  password            String?
+  role                Role
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  profile             Profile?
+  facultyProfile      FacultyProfile?
+  studentProfile      StudentProfile?
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -39,55 +38,107 @@ model Profile {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
+  id        String    @id @default(cuid())
+  token     String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model FacultyProfile {
-  id             String  @id @default(cuid())
-  userId         String  @unique
-  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employeeId     String? @unique
-  initials       String?
-  facultySubjects FacultySubject[]
+  id                 String              @id @default(cuid())
+  userId             String              @unique
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId         String?             @unique
+  initials           String?
+  facultySubjects    FacultySubject[]
+  subjectAllocations SubjectAllocation[]
 }
 
 model StudentProfile {
-  id             String  @id @default(cuid())
-  userId         String  @unique
-  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  rollNumber     String?
-  studentId      String? @unique
-  enrollments    StudentEnrollment[]
+  id          String              @id @default(cuid())
+  userId      String              @unique
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollNumber  String?
+  studentId   String?             @unique
+  enrollments StudentEnrollment[]
 }
 
 model AcademicYear {
-  id        String   @id @default(cuid())
-  name      String
-  startDate DateTime
-  endDate   DateTime
-  isActive  Boolean  @default(false)
-  classes   Class[]
-  enrollments StudentEnrollment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String              @id @default(cuid())
+  name               String
+  yearLabel          String?
+  startDate          DateTime
+  endDate            DateTime
+  isActive           Boolean             @default(false)
+  isCurrent          Boolean             @default(false)
+  classes            Class[]
+  enrollments        StudentEnrollment[]
+  semesters          Semester[]
+  subjectAllocations SubjectAllocation[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 model Department {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   name      String
   code      String?
-  status    Boolean  @default(true)
-  order     Int      @default(0)
+  status    Boolean         @default(true)
+  isActive  Boolean         @default(true)
+  order     Int             @default(0)
   levels    AcademicLevel[]
   classes   Class[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  programs  Program[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model Program {
+  id            String       @id @default(cuid())
+  deptId        String
+  department    Department   @relation(fields: [deptId], references: [id], onDelete: Cascade)
+  title         String
+  code          String?
+  degreeLevel   String       @default("UG") // UG, PG, Diploma
+  durationYears Int          @default(3)
+  isActive      Boolean      @default(true)
+  yearLevels    YearLevel[]
+  divisions     Division[]
+  subjects      Subject[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model YearLevel {
+  id         String     @id @default(cuid())
+  programId  String
+  program    Program    @relation(fields: [programId], references: [id], onDelete: Cascade)
+  yearNumber Int
+  title      String     // FY, SY, TY or Part I, Part II
+  divisions  Division[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([programId, yearNumber])
+}
+
+model Semester {
+  id             String       @id @default(cuid())
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  semNumber      Int          // 1..8
+  termType       String       // ODD | EVEN
+  status         String       @default("UPCOMING") // ACTIVE | LOCKED | UPCOMING
+  startDate      DateTime?
+  endDate        DateTime?
+  breakSchedule  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([academicYearId, semNumber])
 }
 
 model AcademicLevel {
@@ -104,34 +155,38 @@ model AcademicLevel {
 }
 
 model Division {
-  id        String        @id @default(cuid())
-  name      String
-  status    Boolean       @default(true)
-  levelId   String
-  level     AcademicLevel @relation(fields: [levelId], references: [id], onDelete: Cascade)
-  classes   Class[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id           String              @id @default(cuid())
+  name         String
+  status       Boolean             @default(true)
+  levelId      String?
+  level        AcademicLevel?      @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  programId    String?
+  program      Program?            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  yearLevel    String?             // FY, SY, TY
+  yearLevelId  String?
+  yearLevelRel YearLevel?          @relation(fields: [yearLevelId], references: [id], onDelete: Cascade)
+  classes      Class[]
+  allocations  SubjectAllocation[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 }
 
 model Class {
-  id             String       @id @default(cuid())
+  id             String              @id @default(cuid())
   name           String
   departmentId   String
-  department     Department   @relation(fields: [departmentId], references: [id])
+  department     Department          @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   levelId        String
-  level          AcademicLevel @relation(fields: [levelId], references: [id])
+  level          AcademicLevel       @relation(fields: [levelId], references: [id], onDelete: Cascade)
   divisionId     String
-  division       Division     @relation(fields: [divisionId], references: [id])
+  division       Division            @relation(fields: [divisionId], references: [id], onDelete: Cascade)
   academicYearId String
-  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
-  status         Boolean      @default(true)
-  
+  academicYear   AcademicYear        @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  status         Boolean             @default(true)
   subjects       ClassSubject[]
   enrollments    StudentEnrollment[]
-  
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 }
 
 model StudentEnrollment {
@@ -139,10 +194,9 @@ model StudentEnrollment {
   studentId      String
   student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
   classId        String
-  class          Class          @relation(fields: [classId], references: [id])
+  class          Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
   academicYearId String
-  academicYear   AcademicYear   @relation(fields: [academicYearId], references: [id])
-  
+  academicYear   AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -150,23 +204,29 @@ model StudentEnrollment {
 }
 
 model Subject {
-  id          String         @id @default(cuid())
-  name        String
-  code        String?
-  description String?
-  isActive    Boolean        @default(true)
-  classes     ClassSubject[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id                 String              @id @default(cuid())
+  name               String
+  title              String?
+  code               String?
+  description        String?
+  isActive           Boolean             @default(true)
+  programId          String?
+  program            Program?            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  semNumber          Int?
+  hasTheory          Boolean             @default(true)
+  hasPractical       Boolean             @default(false)
+  classes            ClassSubject[]
+  subjectAllocations SubjectAllocation[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 model ClassSubject {
-  id        String   @id @default(cuid())
-  classId   String
-  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
-  subjectId String
-  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  
+  id                 String           @id @default(cuid())
+  classId            String
+  class              Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId          String
+  subject            Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   facultyAssignments FacultySubject[]
 
   @@unique([classId, subjectId])
@@ -182,4 +242,21 @@ model FacultySubject {
   handlesPractical Boolean        @default(false)
 
   @@unique([facultyId, classSubjectId])
+}
+
+model SubjectAllocation {
+  id             String         @id @default(cuid())
+  divisionId     String
+  division       Division       @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  subjectId      String
+  subject        Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  componentType  String         // THEORY | PRACTICAL
+  facultyId      String
+  faculty        FacultyProfile @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  academicYearId String?
+  academicYear   AcademicYear?  @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([divisionId, subjectId, componentType])
 }
