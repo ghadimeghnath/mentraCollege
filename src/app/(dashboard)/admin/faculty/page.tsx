@@ -1,4 +1,4 @@
-import { getFaculties } from "@/features/admin/actions/faculty";
+import { getFaculties, getDepartments } from "@/features/admin/actions/faculty";
 import { FacultyManager } from "@/features/admin/components/FacultyManager";
 import { FacultyFilter } from "@/features/admin/components/FacultyFilter";
 import { Suspense } from "react";
@@ -11,6 +11,7 @@ export default async function FacultyAdminPage(props: {
   const searchQuery = searchParams?.search;
   
   const faculties = await getFaculties(searchQuery);
+  const departments = await getDepartments();
 
   return (
     <div className="space-y-6">
@@ -23,7 +24,7 @@ export default async function FacultyAdminPage(props: {
         <FacultyFilter />
       </Suspense>
       
-      <FacultyManager initialFaculties={faculties} />
+      <FacultyManager initialFaculties={faculties} departments={departments} />
     </div>
   );
 }

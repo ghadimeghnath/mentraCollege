@@ -15,9 +15,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Button variant="ghost" className="justify-start" render={<Link href="/admin/faculty" />} nativeButton={false}>
             Faculty
           </Button>
-          <Button variant="ghost" className="justify-start" render={<Link href="/admin/subjects" />} nativeButton={false}>
-            Subjects
-          </Button>
           <Button variant="ghost" className="justify-start" render={<Link href="/admin/mentorship" />} nativeButton={false}>
             Mentorship
           </Button>

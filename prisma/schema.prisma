@@ -52,7 +52,10 @@ model FacultyProfile {
   userId             String              @unique
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   employeeId         String?             @unique
-  initials           String?
+  initials           String?             @unique
+  departmentId       String?
+  department         Department?         @relation(fields: [departmentId], references: [id])
+  joiningDate        DateTime?
   facultySubjects    FacultySubject[]
   subjectAllocations SubjectAllocation[]
 }
@@ -83,17 +86,18 @@ model AcademicYear {
 }
 
 model Department {
-  id        String          @id @default(cuid())
-  name      String
-  code      String?
-  status    Boolean         @default(true)
-  isActive  Boolean         @default(true)
-  order     Int             @default(0)
-  levels    AcademicLevel[]
-  classes   Class[]
-  programs  Program[]
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id              String           @id @default(cuid())
+  name            String
+  code            String?
+  status          Boolean          @default(true)
+  isActive        Boolean          @default(true)
+  order           Int              @default(0)
+  levels          AcademicLevel[]
+  classes         Class[]
+  programs        Program[]
+  facultyProfiles FacultyProfile[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model Program {
