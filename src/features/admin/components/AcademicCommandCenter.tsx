@@ -72,12 +72,6 @@ export function AcademicCommandCenter({
       {/* Top Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b">
         <div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-primary font-medium text-xs gap-1 py-0.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              Academic Setup Central
-            </Badge>
-          </div>
           <h1 className="text-2xl font-bold tracking-tight mt-1">
             Academic Structure & Curriculum Setup
           </h1>
