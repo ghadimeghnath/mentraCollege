@@ -1,4 +1,5 @@
 import { getClasses, getAcademicYears } from "@/features/admin/actions/academic";
+import { getPrograms } from "@/features/admin/actions/hierarchy";
 import { getStudentsByClass } from "@/features/admin/actions/student";
 import { StudentExcelUpload } from "@/features/admin/components/StudentExcelUpload";
 import { StudentFilter } from "@/features/admin/components/StudentFilter";
@@ -13,6 +14,7 @@ export default async function StudentsAdminPage(props: {
   const searchParams = await props.searchParams;
   const classes = await getClasses();
   const academicYears = await getAcademicYears();
+  const programs = await getPrograms();
 
   const classId = searchParams?.classId;
   const yearId = searchParams?.yearId;
@@ -34,7 +36,7 @@ export default async function StudentsAdminPage(props: {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Suspense fallback={<div className="h-[200px] border rounded-md animate-pulse bg-muted" />}>
-          <StudentFilter classes={classes} academicYears={academicYears} />
+          <StudentFilter classes={classes} academicYears={academicYears} programs={programs} />
         </Suspense>
         
         <Card>
@@ -43,7 +45,7 @@ export default async function StudentsAdminPage(props: {
             <CardDescription>Upload an Excel file to import students into a specific class and academic year.</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center">
-            <StudentExcelUpload classes={classes} academicYears={academicYears} />
+            <StudentExcelUpload classes={classes} academicYears={academicYears} programs={programs} />
           </CardContent>
         </Card>
       </div>

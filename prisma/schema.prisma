@@ -167,6 +167,7 @@ model Division {
   yearLevelRel YearLevel?          @relation(fields: [yearLevelId], references: [id], onDelete: Cascade)
   classes      Class[]
   allocations  SubjectAllocation[]
+  subjects     Subject[]
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 }
@@ -212,6 +213,8 @@ model Subject {
   isActive           Boolean             @default(true)
   programId          String?
   program            Program?            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  divisionId         String?
+  division           Division?           @relation(fields: [divisionId], references: [id], onDelete: Cascade)
   semNumber          Int?
   hasTheory          Boolean             @default(true)
   hasPractical       Boolean             @default(false)

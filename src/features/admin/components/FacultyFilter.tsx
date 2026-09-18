@@ -39,6 +39,7 @@ export function FacultyFilter() {
           <div className="space-y-2 w-full sm:w-2/3">
             <label htmlFor="search" className="text-sm font-medium">Search Query</label>
             <Input
+              key={currentSearch}
               id="search"
               name="search"
               defaultValue={currentSearch}

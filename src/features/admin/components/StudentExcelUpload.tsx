@@ -11,17 +11,28 @@ import { Class, Department, AcademicLevel, Division, AcademicYear } from "@prism
 
 export function StudentExcelUpload({ 
   classes, 
-  academicYears 
+  academicYears,
+  programs
 }: { 
   classes: (Class & { department: Department, level: AcademicLevel, division: Division })[],
-  academicYears: AcademicYear[] 
+  academicYears: AcademicYear[],
+  programs: any[]
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<any[]>([]);
-  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedProgramId, setSelectedProgramId] = useState("");
+  const [selectedYearLevel, setSelectedYearLevel] = useState("");
+  const [selectedDivision, setSelectedDivision] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Extract year levels based on selected program
+  const selectedProgramObj = programs.find((p) => p.id === selectedProgramId);
+  const yearLevels = selectedProgramObj?.yearLevels?.map((yl: any) => yl.title) || [];
+
+  // Extract available classes (divisions) based on selected program and year level
+  const availableDivisions = selectedProgramObj?.divisions?.filter((d: any) => d.yearLevel === selectedYearLevel) || [];
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
@@ -61,8 +72,8 @@ export function StudentExcelUpload({
   };
 
   const handleImport = async () => {
-    if (!selectedClass || !selectedYear) {
-      toast.error("Please select both a class and an academic year.");
+    if (!selectedDivision || !selectedYear) {
+      toast.error("Please select both a division and an academic year.");
       return;
     }
     if (previewData.length === 0) {
@@ -73,7 +84,7 @@ export function StudentExcelUpload({
     setIsUploading(true);
     try {
       const result = await importStudentsBulk({
-        classId: selectedClass,
+        classId: selectedDivision, // Actually passing divisionId
         academicYearId: selectedYear,
         students: previewData
       });
@@ -90,6 +101,18 @@ export function StudentExcelUpload({
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Reset dependent fields when parent selection changes
+  const handleProgramChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProgramId(e.target.value);
+    setSelectedYearLevel("");
+    setSelectedDivision("");
+  };
+
+  const handleYearLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYearLevel(e.target.value);
+    setSelectedDivision("");
   };
 
   return (
@@ -117,15 +140,43 @@ export function StudentExcelUpload({
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Class</label>
+            <label className="text-sm font-medium">Degree Program</label>
             <select 
-              value={selectedClass} 
-              onChange={e => setSelectedClass(e.target.value)}
+              value={selectedProgramId} 
+              onChange={handleProgramChange}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <option value="">Select Class</option>
-              {classes.map(c => (
-                <option key={c.id} value={c.id}>{c.name} ({c.department.name})</option>
+              <option value="">Select Program</option>
+              {programs.map((p: any) => (
+                <option key={p.id} value={p.id}>{p.title}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Year Level</label>
+            <select 
+              value={selectedYearLevel} 
+              onChange={handleYearLevelChange}
+              disabled={!selectedProgramId}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50"
+            >
+              <option value="">Select Year</option>
+              {yearLevels.map((yl: any) => (
+                <option key={yl} value={yl}>{yl}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Division (Class)</label>
+            <select 
+              value={selectedDivision} 
+              onChange={e => setSelectedDivision(e.target.value)}
+              disabled={!selectedYearLevel}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50"
+            >
+              <option value="">Select Division</option>
+              {availableDivisions.map((d: any) => (
+                <option key={d.id} value={d.id}>Div {d.name}</option>
               ))}
             </select>
           </div>
@@ -172,7 +223,7 @@ export function StudentExcelUpload({
 
         <Button 
           onClick={handleImport} 
-          disabled={isUploading || previewData.length === 0 || !selectedClass || !selectedYear}
+          disabled={isUploading || previewData.length === 0 || !selectedDivision || !selectedYear}
           className="w-full mt-4"
         >
           {isUploading ? "Importing..." : "Confirm Import"}

@@ -73,6 +73,8 @@ The system identifies five distinct user roles. Each role has its **own dedicate
 - **FR-ADM-2 (Subject Management):** Admins shall be able to create course subjects and assign teachers to them.
 - **FR-ADM-3 (Mentorship Allocation):** Admins shall have the ability to link students to mentors (`student_mentors` table).
 - **FR-ADM-4 (Analytics):** The dashboard shall display aggregate counts of active students, teachers, mentors, and subjects, computed via Postgres views and/or aggregate queries executed through Prisma (`prisma.$queryRaw`/`groupBy` as needed).
+- **FR-ADM-5 (Bulk Onboarding):** Admins shall be able to upload student and faculty records in bulk via Excel files, including data format validation, error handling, and compatibility adjustments for existing records.
+- **FR-ADM-6 (Advanced Filtering):** Admins shall be able to apply advanced, controlled filters to student and faculty lists (e.g., by program, semester, department, or status) for precise data retrieval and management.
 ### 3.3 Teacher Module
 - **FR-TCH-1 (Class Roster):** Teachers shall view a list of students assigned to the classes and subjects they teach.
 - **FR-TCH-2 (Attendance Logging):** Teachers shall record daily student attendance (Present, Absent, Leave, Late).

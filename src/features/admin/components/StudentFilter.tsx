@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 export function StudentFilter({
   classes,
   academicYears,
+  programs,
 }: {
   classes: (Class & { department: Department; level: AcademicLevel; division: Division })[];
   academicYears: AcademicYear[];
+  programs?: any[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -73,11 +75,18 @@ export function StudentFilter({
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">All Classes</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.department.code})
-                </option>
-              ))}
+              {classes.map((c) => {
+                const program = (c as any).division?.program;
+                const yearLevel = (c as any).division?.yearLevel;
+                const divName = (c as any).division?.name;566
+                const displayName = program ? `${program.title} - ${yearLevel} - Div ${divName}` : `${c.name} (${c.department.code})`;
+                
+                return (
+                  <option key={c.id} value={c.id}>
+                    {displayName}
+                  </option>
+                );
+              })}
             </select>
           </div>
           

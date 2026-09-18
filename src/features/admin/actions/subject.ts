@@ -21,6 +21,7 @@ export async function getSubjects(programId?: string, semNumber?: number) {
           department: true,
         },
       },
+      division: true,
       subjectAllocations: {
         include: {
           faculty: {
@@ -45,24 +46,39 @@ export async function createSubject(data: {
   code?: string;
   description?: string;
   programId?: string;
+  divisionIds?: string[];
   semNumber?: number;
   hasTheory?: boolean;
   hasPractical?: boolean;
   isActive?: boolean;
 }) {
-  const result = await prisma.subject.create({
-    data: {
-      name: data.name,
-      title: data.title || data.name,
-      code: data.code,
-      description: data.description,
-      programId: data.programId || null,
-      semNumber: data.semNumber ? Number(data.semNumber) : null,
-      hasTheory: data.hasTheory !== undefined ? data.hasTheory : true,
-      hasPractical: data.hasPractical !== undefined ? data.hasPractical : false,
-      isActive: data.isActive !== undefined ? data.isActive : true,
-    },
-  });
+  const commonData = {
+    name: data.name,
+    title: data.title || data.name,
+    code: data.code,
+    description: data.description,
+    programId: data.programId || null,
+    semNumber: data.semNumber ? Number(data.semNumber) : null,
+    hasTheory: data.hasTheory !== undefined ? data.hasTheory : true,
+    hasPractical: data.hasPractical !== undefined ? data.hasPractical : false,
+    isActive: data.isActive !== undefined ? data.isActive : true,
+  };
+
+  let result;
+  if (data.divisionIds && data.divisionIds.length > 0) {
+    // Create multiple subjects, one for each division
+    const creates = data.divisionIds.map((divId) =>
+      prisma.subject.create({
+        data: { ...commonData, divisionId: divId },
+      })
+    );
+    result = await prisma.$transaction(creates);
+  } else {
+    result = await prisma.subject.create({
+      data: commonData,
+    });
+  }
+
   safeRevalidate("/admin/academic");
   safeRevalidate("/admin/subjects");
   return result;

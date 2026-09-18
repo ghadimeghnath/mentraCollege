@@ -21,13 +21,74 @@ export async function getStudentsByClass(classId: string, academicYearId: string
 }
 
 export async function importStudentsBulk(data: {
-  classId: string;
+  classId: string; // Wait, actually passing divisionId from UI
   academicYearId: string;
   students: { name: string; email: string; rollNumber?: string; studentId?: string; phone?: string }[]
 }) {
-  const { classId, academicYearId, students } = data;
+  const { classId: divisionId, academicYearId, students } = data;
   
   const results = { successful: 0, failed: 0, errors: [] as string[] };
+
+  // 0. Resolve the actual Class from the Division and AcademicYear
+  const division = await prisma.division.findUnique({
+    where: { id: divisionId },
+    include: { program: true }
+  });
+
+  if (!division) {
+    throw new Error("Selected division not found.");
+  }
+
+  // We need a departmentId and levelId to find/create a Class
+  // Fallback to a default level if the program doesn't map directly
+  const departmentId = division.program?.deptId;
+  let levelId = division.levelId;
+
+  if (!departmentId) {
+    throw new Error("Program/Department missing for this division.");
+  }
+
+  if (!levelId) {
+    // Legacy support: Try to find an AcademicLevel for this department
+    const firstLevel = await prisma.academicLevel.findFirst({
+      where: { departmentId }
+    });
+    
+    if (firstLevel) {
+      levelId = firstLevel.id;
+    } else {
+      // Create a default level if none exists
+      const newLevel = await prisma.academicLevel.create({
+        data: {
+          name: division.yearLevel || "Default Level",
+          departmentId
+        }
+      });
+      levelId = newLevel.id;
+    }
+  }
+
+  // Find or create the Class
+  let targetClass = await prisma.class.findFirst({
+    where: {
+      divisionId: division.id,
+      academicYearId
+    }
+  });
+
+  if (!targetClass) {
+    targetClass = await prisma.class.create({
+      data: {
+        name: `Class - ${division.program?.title} - Div ${division.name}`,
+        departmentId,
+        levelId,
+        divisionId: division.id,
+        academicYearId
+      }
+    });
+  }
+
+  const actualClassId = targetClass.id;
   
   for (const student of students) {
     try {
@@ -81,11 +142,11 @@ export async function importStudentsBulk(data: {
           }
         },
         update: {
-          classId,
+          classId: actualClassId,
         },
         create: {
           studentId: studentProfileId,
-          classId,
+          classId: actualClassId,
           academicYearId,
         }
       });

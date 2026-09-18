@@ -139,7 +139,11 @@ export async function getClasses(academicYearId?: string) {
     include: {
       department: true,
       level: true,
-      division: true,
+      division: {
+        include: {
+          program: true,
+        },
+      },
       academicYear: true,
     },
     orderBy: [
